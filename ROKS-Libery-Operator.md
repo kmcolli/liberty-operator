@@ -239,87 +239,92 @@ From the terminal window, issue the command:
   
 ```
 oc get pod -n operators
-```
-  You will see that your application pod is in running status.
-    '![Alt Image Text](images/oc-get-pods-operators.jpg )'
-  
-  Execute the following command to get the NodePort of the pod:
-  
-  ```
-  oc get svc -n operators
-  
-  ```
-  As you can see the NodePort of the pod is 32604 in the screenshot. Yours might be different.
-  
-  '![Alt Image Text](images/oc-get-svc.jpg )'
-  
-  create a route to service
-  
-  ```
-  oc expose service appmod-aw8jwhuqblnr5onpq
-  
-  ```
-  
-  Note: use the service name *appmod-aw8jwhuqblnr5onpq* you got from the previous stop  
-  ![Alt Image Text](images/oc-get-routes.jpg ) 
-  
-  Now you can launch the application from a new browser window.  Type the application URL as 
-  
-  url you got from the route you created:NodePort/resorts
-  
-  for example: 
-   
- 		https://appmod-aw8jwhuqblnr5onpq-operators.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud:32604/resorts/
-  
-  and press Enter. 
-  
-  If you see the message “Warning: Potential Security Risk Ahead”, click Advanced>Accept the Risk and Continue to continue.
-  
-  The app home page will be displayed. Click WHERE TO? to view city list.
-    ![Alt Image Text](images/app-mod-site.jpg ) 
-    
-  Click LAS VEGAS, USA from the listandit will show the weather of the city.
-  
-  
-  ### Update the Open Liberty Container Deployment
-  
-  In the task, you are going to make a change to the deployment YAML file, add one more replica to the pod and re-deploy the application. You will see the deployment would update itself automatically to have 2 replicas.
-  
-  #### Edit the deployment YAML file.
-  * Navigate to the appmod-resorts/deploy/apps/appmod/v1.0.0/ directory.
-  * Open app-mod_cr.yaml for editing.
-  * Change the replicaCount from 1 to 2 and save.
 
-   ```
-   apiVersion: openliberty.io/v1alpha1
-   kind: OpenLiberty
-   metadata:
-     name: appmod
-   spec:
-     image:
-       repository: docker-registry.default.svc:5000/demo/app-modernization
-       tag: v1.0.0
-       pullPolicy: IfNotPresent
-     replicaCount: 2
+```
+  
+You will see that your application pod is in running status.
+![Alt Image Text](images/oc-get-pods-operators.jpg )
+  
+Execute the following command to get the NodePort of the pod:
+  
+```
+oc get svc -n operators
+  
+```
+  
+As you can see the NodePort of the pod is 32604 in the screenshot. Yours might be different.
+  
+![Alt Image Text](images/oc-get-svc.jpg )
+  
+create a route to service
+  
+```
+oc expose service appmod-aw8jwhuqblnr5onpq
+  
+```
+  
+Note: use the service name *appmod-aw8jwhuqblnr5onpq* you got from the previous stop  
+![Alt Image Text](images/oc-get-routes.jpg ) 
+  
+Now you can launch the application from a new browser window.  Type the application URL as 
+  
+url you got from the route you created:NodePort/resorts
+  
+for example: 
+   
+```
+https://appmod-aw8jwhuqblnr5onpq-operators.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud:32604/resorts/
+
+```  
+and press Enter. 
+  
+If you see the message “Warning: Potential Security Risk Ahead”, click Advanced>Accept the Risk and Continue to continue.
+  
+The app home page will be displayed. Click WHERE TO? to view city list.
+![Alt Image Text](images/app-mod-site.jpg ) 
+    
+Click LAS VEGAS, USA from the listandit will show the weather of the city.
+  
+  
+### Update the Open Liberty Container Deployment
+  
+In the task, you are going to make a change to the deployment YAML file, add one more replica to the pod and re-deploy the application. You will see the deployment would update itself automatically to have 2 replicas.
+  
+#### Edit the deployment YAML file.
+* Navigate to the appmod-resorts/deploy/apps/appmod/v1.0.0/ directory.
+* Open app-mod_cr.yaml for editing.
+* Change the replicaCount from 1 to 2 and save.
+
+```
+apiVersion: openliberty.io/v1alpha1
+kind: OpenLiberty
+metadata:
+  name: appmod
+spec:
+  image:
+    repository: docker-registry.default.svc:5000/demo/app-modernization
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 2
  	
- 	```
+```
  	
- 	From the terminal window, deploy the Docker container with command:
+From the terminal window, deploy the Docker container with command:
  	
- 	```
- 	oc apply -f deploy/apps/appmod/v1.0.0/app-mod_cr.yaml -n operators
+```
+oc apply -f deploy/apps/appmod/v1.0.0/app-mod_cr.yaml -n operators
  	
- 	```
+```
  	
- 	Once deployed, issue the following command:
+Once deployed, issue the following command:
  	
- 	```
- 	oc get pod -n operators| grep appmod
+```
+oc get pod -n operators| grep appmod
  	
- 	```
+```
  	
- 	You will see that your application pod has two instances running.
-	![Alt Image Text](images/get-pod-2.jpg )	
+You will see that your application pod has two instances running.
+![Alt Image Text](images/get-pod-2.jpg )	
 
 ## Summary
 In this lab, you have learned how to use Open Liberty Operator to deploy your applications to IBM Cloud. As a part of IBM App Modernization solutions in IBM Cloud Pak for Application, the Open Liberty Operator helps users effectively deploying and managing applications running on Open Liberty containers to a Kubernetes cluster. To learn more about IBM App Modernization solutions, please visit Cloud Pak for Applications.
