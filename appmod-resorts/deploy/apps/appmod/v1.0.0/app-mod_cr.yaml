@@ -1,0 +1,11 @@
+apiVersion: openliberty.io/v1alpha1
+kind: OpenLiberty
+metadata:
+  name: appmod
+spec:
+  image:
+    repository: docker-registry.default.svc:5000/demo/app-modernization
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+

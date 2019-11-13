@@ -1,0 +1,3 @@
+FROM openliberty/open-liberty:javaee8-ubi-min
+COPY --chown=1001:0 data/examples/modresorts-1.0.war /config/dropins
+
