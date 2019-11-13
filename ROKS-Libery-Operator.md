@@ -49,7 +49,7 @@ The IBM Cloud Pak for Application has a tool called Transformation Advisor, whic
 
 The Dockerfile is the key file you needed to build your Docker image. It defines how the Docker image that has the Mod Resorts application and configuration pre-loaded will be built.
 
-####Review the Dockerfile file.
+#### Review the Dockerfile file.
 Navigate to /appmod-resorts/ directory from the github repository you cloned.
 
 Open dockerfile for reviewing.
@@ -57,6 +57,7 @@ Open dockerfile for reviewing.
 ```
 FROM openliberty/open-liberty:javaee8-ubi-min  
 COPY --chown=1001:0 data/examples/modresorts-1.0.war /config/dropins
+
 ```
 As you can see, the file defines the following activities to create the Open Liberty Docker image:
 
@@ -71,7 +72,9 @@ Build the Docker image and publish it to the the IBM Cloud Container Registry by
 cd appmod-resorts/
 
 docker build -t us.icr.io/kmcolli/demo/app-modernization:v1.0.0 .
+
 ```
+
 where 
 
 * **us.icr.io/kmcolli** is your IBM Cloud Container Registry 
@@ -83,6 +86,7 @@ After the docker container image is created, you can issue the command below to 
 
 ```
 docker images |grep app-modernization
+
 ```
 You will see your docker image.
 
@@ -96,132 +100,146 @@ From the terminal window, issue the command below to login to the OCP.
 * Log into your IBM Cloud Managed OpenShift Cluster - copy the login command from the Openshift Console
 * change to the default project
   
-  ```
-	oc project default
-	```
+```
+oc project default
+	
+```
 * Create a secured route for the docker-registry service that uses reencrypt TLS termination. With re-encryption, the router terminates the TLS connection with a certificate, and then re-encrypts the connection to the internal registry with a different certificate. With this approach, the full path of the connection between the user and the internal registry is encrypted.
 
-	```
-	oc create route reencrypt --service=docker-registry
-	```
+```
+oc create route reencrypt --service=docker-registry
+```
 	
 * Retrieve the hostname (HOST/PORT) and the PORT that were assigned to the docker-registry route.
 
-	```
-	oc get route docker-registry
-	```
+```
+oc get route docker-registry
 	
-   Example output:
+```
+	
+Example output:
    
-   ```
-   NAME              HOST/PORT                                                                                                 
-   docker-registry   docker-registry-default.<cluster_name>-<ID_string>.<region>.containers.appdomain.cloud             
-   ```
-   Copy the host to login into docker
+```
+NAME              HOST/PORT                                                                                                 
+docker-registry   docker-registry-default.<cluster_name>-<ID_string>.<region>.containers.appdomain.cloud             
+   
+```
+ 
+Copy the host to login into docker
 	
-	```
-	docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud
-	```
+```
+docker login -u $(oc whoami) -p $(oc whoami -t) docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud
+	
+```
 
 * Execute the following commands to push your docker image to IBM Cloud Private image repository.
 
-	```
-	docker tag app-modernization:v1.0.0 docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud/demo/app-modernization:v1.0.0
+```
+docker tag app-modernization:v1.0.0 docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud/demo/app-modernization:v1.0.0
 
-	docker push docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud/demo/app-modernization:v1.0.0
-	```
+docker push docker-registry-default.k-roks-apak-865ffcc72a16e7f393d2878612ad8f9c-0001.us-south.containers.appdomain.cloud/demo/app-modernization:v1.0.0
+	
+```
 
 * Verify the image is added to the OpenShift image stream
 	
-	```
-	oc get imagestream
-	```
+```
+oc get imagestream
 	
-	##Deploy the Open Liberty operator.
+```
+	
+## Deploy the Open Liberty operator.
   
-  You are going to use the OpenShift CLI commandsto deploy the Open Libertycontainer.
+You are going to use the OpenShift CLI commandsto deploy the Open Libertycontainer.
   
-  * From the terminal window, issue the following command to add the Open Liberty operator security context constraints to the operators namespace where you are going to deploy the application to:
+* From the terminal window, issue the following command to add the Open Liberty operator security context constraints to the operators namespace where you are going to deploy the application to:
 
-	Create a new operators project
+Create a new operators project
 	
-	```
-	oc create ns operators
-	```
+```
+oc create ns operators
 	
-  	Install Operator artifacts  
+```
+	
+Install Operator artifacts  
   	
    
-  	```
-	git clone https://github.com/OpenLiberty/open-liberty-operator.git 
-	cd open-liberty-operator
-	kubectl apply -f olm/open-liberty-crd.yaml
-	kubectl apply -f deploy/service_account.yaml
-	kubectl apply -f deploy/role.yaml
-	kubectl apply -f deploy/role_binding.yaml
-	kubectl apply -f deploy/operator.yaml
-	```
+```
+git clone https://github.com/OpenLiberty/open-liberty-operator.git 
+cd open-liberty-operator
+kubectl apply -f olm/open-liberty-crd.yaml
+kubectl apply -f deploy/service_account.yaml
+kubectl apply -f deploy/role.yaml
+kubectl apply -f deploy/role_binding.yaml
+kubectl apply -f deploy/operator.yaml
+	
+```  
 
-	Install security and set image pull policy for the operators namespace:
+Install security and set image pull policy for the operators namespace:
 
-	```
-	kubectl apply -f deploy/ibm-open-liberty-scc.yaml --validate=false
-	oc adm policy add-scc-to-group ibm-open-liberty-scc system:serviceaccounts:operators
-	```
+```
+kubectl apply -f deploy/ibm-open-liberty-scc.yaml --validate=false
+oc adm policy add-scc-to-group ibm-open-liberty-scc system:serviceaccounts:operators
+	
+```  
+	
 
-	Note: you will need to install the open liberty operator for each namespace you want to deploy an open liberty operator to. 
+Note: you will need to install the open liberty operator for each namespace you want to deploy an open liberty operator to. 
   	
  	
-	##Deploy the Open Liberty Container to OpenShift using the Open Liberty Operator
-	Review the deployment YAML file.
+##Deploy the Open Liberty Container to OpenShift using the Open Liberty Operator
+Review the deployment YAML file.
 	
-	Navigate to the github repo you previously cloned.
-	Open and review appmod-resorts/deploy/apps/appmod/v1.0.0/app-mod_cr.yaml
 	
-	```
-	apiVersion: openliberty.io/v1alpha1
-	kind: OpenLiberty
-	metadata:
-     name: appmod
-	spec:
-     image:
-       repository: docker-registry.default.svc:5000/demo/app-modernization
-       tag: v1.0.0
-       pullPolicy: IfNotPresent
-     replicaCount: 1
-  ```
+Navigate to the github repo you previously cloned.
+Open and review appmod-resorts/deploy/apps/appmod/v1.0.0/app-mod_cr.yaml
+	
+```
+apiVersion: openliberty.io/v1alpha1
+kind: OpenLiberty
+metadata:
+  name: appmod
+spec:
+  image:
+    repository: docker-registry.default.svc:5000/demo/app-modernization
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  replicaCount: 1
   
-  Deploy the Open Liberty Docker container to OpenShift Kubernetes cluster with the command:
+ ```
   
-  ```
-  oc apply -f deploy/apps/appmod/v1.0.0/app-mod_cr.yaml -n operators
-  ```
+Deploy the Open Liberty Docker container to OpenShift Kubernetes cluster with the command:
   
-  The Open Liberty container is deployed to OpenShift Kubernetes cluster operators namespace.
+```
+oc apply -f deploy/apps/appmod/v1.0.0/app-mod_cr.yaml -n operators
+```
+  
+The Open Liberty container is deployed to OpenShift Kubernetes cluster operators namespace.
   
   
-  ### Verify the Open Liberty Container Deployment
   
-  After the Open Liberty container is deployed, you can go to the OCP console to take a look at the deployment details.
+### Verify the Open Liberty Container Deployment
   
-  Go back to the OCP console window, click the project dropdown menu and select the operators project.
+After the Open Liberty container is deployed, you can go to the OCP console to take a look at the deployment details.
   
-  '![Alt Image Text](images/select-operators.jpg )'
+Go back to the OCP console window, click the project dropdown menu and select the operators project.
   
-  From the operators project, select Deployments from the Applications list.
+![Alt Image Text](images/select-operators.jpg )
   
-  '![Alt Image Text](images/deployments-applications.jpg )'
+From the operators project, select Deployments from the Applications list.
   
-  You can see that your application is in the deployment list.
+![Alt Image Text](images/deployments-applications.jpg )
+  
+You can see that your application is in the deployment list.
 
   
-   '![Alt Image Text](images/app-mod-deployment.jpg )'
+![Alt Image Text](images/app-mod-deployment.jpg )
 
-  From the terminal window, issue the command:
+From the terminal window, issue the command:
   
-  ```
-  oc get pod -n operators
-  ```
+```
+oc get pod -n operators
+```
   You will see that your application pod is in running status.
     '![Alt Image Text](images/oc-get-pods-operators.jpg )'
   
@@ -229,6 +247,7 @@ From the terminal window, issue the command below to login to the OCP.
   
   ```
   oc get svc -n operators
+  
   ```
   As you can see the NodePort of the pod is 32604 in the screenshot. Yours might be different.
   
@@ -238,10 +257,11 @@ From the terminal window, issue the command below to login to the OCP.
   
   ```
   oc expose service appmod-aw8jwhuqblnr5onpq
+  
   ```
   
   Note: use the service name *appmod-aw8jwhuqblnr5onpq* you got from the previous stop  
-  '![Alt Image Text](images/oc-get-routes.jpg )' 
+  ![Alt Image Text](images/oc-get-routes.jpg ) 
   
   Now you can launch the application from a new browser window.  Type the application URL as 
   
@@ -256,7 +276,7 @@ From the terminal window, issue the command below to login to the OCP.
   If you see the message “Warning: Potential Security Risk Ahead”, click Advanced>Accept the Risk and Continue to continue.
   
   The app home page will be displayed. Click WHERE TO? to view city list.
-    '![Alt Image Text](images/app-mod-site.jpg )' 
+    ![Alt Image Text](images/app-mod-site.jpg ) 
     
   Click LAS VEGAS, USA from the listandit will show the weather of the city.
   
@@ -281,22 +301,25 @@ From the terminal window, issue the command below to login to the OCP.
        tag: v1.0.0
        pullPolicy: IfNotPresent
      replicaCount: 2
+ 	
  	```
  	
  	From the terminal window, deploy the Docker container with command:
  	
  	```
  	oc apply -f deploy/apps/appmod/v1.0.0/app-mod_cr.yaml -n operators
+ 	
  	```
  	
  	Once deployed, issue the following command:
  	
  	```
  	oc get pod -n operators| grep appmod
+ 	
  	```
  	
  	You will see that your application pod has two instances running.
-	'![Alt Image Text](images/get-pod-2.jpg )'	
+	![Alt Image Text](images/get-pod-2.jpg )	
 
 ## Summary
 In this lab, you have learned how to use Open Liberty Operator to deploy your applications to IBM Cloud. As a part of IBM App Modernization solutions in IBM Cloud Pak for Application, the Open Liberty Operator helps users effectively deploying and managing applications running on Open Liberty containers to a Kubernetes cluster. To learn more about IBM App Modernization solutions, please visit Cloud Pak for Applications.
